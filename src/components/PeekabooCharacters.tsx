@@ -1,6 +1,6 @@
 /**
  * 四几何角色 SVG。眼珠由 usePeekabooPupilVisuals 驱动；
- * 偷瞄：绕脚底 transformOrigin 向右倾 + scaleY 伸脖子（非整体上移）。
+ * 偷瞄体态通过 path morph：下半段固定，上半段拉伸并向右弯腰。
  */
 import { motion } from 'framer-motion'
 import type { EyeGroupId, PupilId } from '../hooks/usePeekabooPupilVisuals'
@@ -8,8 +8,8 @@ import type { InteractionState } from '../types/interaction'
 
 const bodyTransition = {
   type: 'spring' as const,
-  stiffness: 340,
-  damping: 30,
+  stiffness: 200,
+  damping: 20,
 }
 
 type Props = {
@@ -18,10 +18,41 @@ type Props = {
   pupilRefs: Record<PupilId, (node: SVGGraphicsElement | null) => void>
 }
 
-/** 输入账号、或输入密码且仍为密文时：统一偷瞄体态 */
-function isPeekPose(state: InteractionState) {
-  return state === 'EMAIL_FOCUS' || state === 'PASSWORD_FOCUS'
+type BodyPose = 'IDLE' | 'EMAIL_FOCUS' | 'PASSWORD_FOCUS' | 'PASSWORD_VISIBLE'
+
+function getBodyPose(state: InteractionState): BodyPose {
+  if (state === 'EMAIL_FOCUS') return 'EMAIL_FOCUS'
+  if (state === 'PASSWORD_FOCUS') return 'PASSWORD_FOCUS'
+  if (state === 'PASSWORD_VISIBLE') return 'PASSWORD_VISIBLE'
+  return 'IDLE'
 }
+
+const BODY_PATHS = {
+  purple: {
+    IDLE: 'M 158 290 L 262 290 L 262 74 Q 210 40 158 74 Z',
+    EMAIL_FOCUS: 'M 158 290 L 262 290 L 254 30 Q 214 -2 166 30 Z',
+    PASSWORD_FOCUS: 'M 158 290 L 262 290 L 278 68 Q 230 30 178 68 Z',
+    PASSWORD_VISIBLE: 'M 158 290 L 262 290 L 248 90 Q 203 56 158 90 Z',
+  },
+  black: {
+    IDLE: 'M 228 290 L 322 290 L 322 154 Q 275 112 228 154 Z',
+    EMAIL_FOCUS: 'M 228 290 L 322 290 L 314 94 Q 281 62 236 94 Z',
+    PASSWORD_FOCUS: 'M 228 290 L 322 290 L 340 150 Q 297 112 248 150 Z',
+    PASSWORD_VISIBLE: 'M 228 290 L 322 290 L 308 172 Q 268 140 228 172 Z',
+  },
+  orange: {
+    IDLE: 'M 34 290 L 166 290 L 166 240 Q 100 174 34 240 Z',
+    EMAIL_FOCUS: 'M 34 290 L 166 290 L 158 186 Q 108 126 42 186 Z',
+    PASSWORD_FOCUS: 'M 34 290 L 166 290 L 184 236 Q 126 170 58 236 Z',
+    PASSWORD_VISIBLE: 'M 34 290 L 166 290 L 152 252 Q 93 200 34 252 Z',
+  },
+  yellow: {
+    IDLE: 'M 322 290 L 404 290 L 404 214 Q 363 174 322 214 Z',
+    EMAIL_FOCUS: 'M 322 290 L 404 290 L 396 158 Q 369 116 330 158 Z',
+    PASSWORD_FOCUS: 'M 322 290 L 404 290 L 422 208 Q 388 166 342 208 Z',
+    PASSWORD_VISIBLE: 'M 322 290 L 404 290 L 390 228 Q 356 194 322 228 Z',
+  },
+} as const
 
 const svgPivotStyle = {
   transformBox: 'fill-box' as const,
@@ -33,7 +64,13 @@ export default function PeekabooCharacters({
   eyeGroupRefs,
   pupilRefs,
 }: Props) {
-  const peek = isPeekPose(interactionState)
+  const pose = getBodyPose(interactionState)
+  const eyeOffset = {
+    IDLE: { x: 0, y: 0 },
+    EMAIL_FOCUS: { x: 8, y: -18 },
+    PASSWORD_FOCUS: { x: 12, y: -8 },
+    PASSWORD_VISIBLE: { x: -6, y: -3 },
+  }[pose]
 
   return (
     <div className="flex w-full max-w-lg justify-center">
@@ -50,68 +87,78 @@ export default function PeekabooCharacters({
           initial={false}
           style={svgPivotStyle}
           animate={{
-            rotate: peek ? 9 : 0,
-            scaleY: peek ? 1.1 : 1,
+            rotate: 0,
+            scaleY: 1,
             x: 0,
             y: 0,
           }}
           transition={bodyTransition}
         >
-          <path
+          <motion.path
             id="peekaboo-body-purple"
             fill="#7C5CE6"
-            d="M 158 290 L 158 64 Q 158 42 178 42 L 242 42 Q 262 42 262 64 L 262 290 Z"
+            initial={false}
+            animate={{
+              d: BODY_PATHS.purple[pose],
+            }}
+            transition={bodyTransition}
           />
-          <g
-            id="peekaboo-eye-purple-L"
-            ref={eyeGroupRefs['peekaboo-eye-purple-L']}
-            transform="translate(192, 92)"
+          <motion.g
+            initial={false}
+            animate={{ x: eyeOffset.x, y: eyeOffset.y }}
+            transition={bodyTransition}
           >
-            <rect
-              id="peekaboo-eye-bg-purple-L"
-              x="-12"
-              y="-6"
-              width="20"
-              height="12"
-              rx="3"
-              fill="#5B4DB8"
-            />
-            <rect
-              id="peekaboo-pupil-purple-L"
-              ref={pupilRefs['peekaboo-pupil-purple-L']}
-              x="-8"
-              y="-2"
-              width="12"
-              height="4"
-              rx="1"
-              fill="#FFFFFF"
-            />
-          </g>
-          <g
-            id="peekaboo-eye-purple-R"
-            ref={eyeGroupRefs['peekaboo-eye-purple-R']}
-            transform="translate(228, 92)"
-          >
-            <rect
-              id="peekaboo-eye-bg-purple-R"
-              x="-12"
-              y="-6"
-              width="20"
-              height="12"
-              rx="3"
-              fill="#5B4DB8"
-            />
-            <rect
-              id="peekaboo-pupil-purple-R"
-              ref={pupilRefs['peekaboo-pupil-purple-R']}
-              x="-8"
-              y="-2"
-              width="12"
-              height="4"
-              rx="1"
-              fill="#FFFFFF"
-            />
-          </g>
+            <g
+              id="peekaboo-eye-purple-L"
+              ref={eyeGroupRefs['peekaboo-eye-purple-L']}
+              transform="translate(192, 92)"
+            >
+              <rect
+                id="peekaboo-eye-bg-purple-L"
+                x="-12"
+                y="-6"
+                width="20"
+                height="12"
+                rx="3"
+                fill="#5B4DB8"
+              />
+              <rect
+                id="peekaboo-pupil-purple-L"
+                ref={pupilRefs['peekaboo-pupil-purple-L']}
+                x="-8"
+                y="-2"
+                width="12"
+                height="4"
+                rx="1"
+                fill="#FFFFFF"
+              />
+            </g>
+            <g
+              id="peekaboo-eye-purple-R"
+              ref={eyeGroupRefs['peekaboo-eye-purple-R']}
+              transform="translate(228, 92)"
+            >
+              <rect
+                id="peekaboo-eye-bg-purple-R"
+                x="-12"
+                y="-6"
+                width="20"
+                height="12"
+                rx="3"
+                fill="#5B4DB8"
+              />
+              <rect
+                id="peekaboo-pupil-purple-R"
+                ref={pupilRefs['peekaboo-pupil-purple-R']}
+                x="-8"
+                y="-2"
+                width="12"
+                height="4"
+                rx="1"
+                fill="#FFFFFF"
+              />
+            </g>
+          </motion.g>
         </motion.g>
 
         <motion.g
@@ -119,64 +166,72 @@ export default function PeekabooCharacters({
           initial={false}
           style={svgPivotStyle}
           animate={{
-            rotate: peek ? 9 : 0,
-            scaleY: peek ? 1.1 : 1,
+            rotate: 0,
+            scaleY: 1,
             x: 0,
             y: 0,
           }}
           transition={bodyTransition}
         >
-          <path
+          <motion.path
             id="peekaboo-body-black"
             fill="#1A1A1A"
-            // Fatter: much wider, rounder body, with matching top curve
-            d="M 228 290 L 228 147 Q 228 118 275 118 Q 322 118 322 147 L 322 290 Z"
+            initial={false}
+            animate={{
+              d: BODY_PATHS.black[pose],
+            }}
+            transition={bodyTransition}
           />
-          <g
-            id="peekaboo-eye-black-L"
-            ref={eyeGroupRefs['peekaboo-eye-black-L']}
-            // Move eyes outward and slightly downward for fatter/rounder look
-            transform="translate(260, 161)"
+          <motion.g
+            initial={false}
+            animate={{ x: eyeOffset.x, y: eyeOffset.y }}
+            transition={bodyTransition}
           >
-            <ellipse
-              id="peekaboo-eye-bg-black-L"
-              cx="0"
-              cy="0"
-              rx="12"
-              ry="11"
-              fill="#FFFFFF"
-            />
-            <circle
-              id="peekaboo-pupil-black-L"
-              ref={pupilRefs['peekaboo-pupil-black-L']}
-              cx="0"
-              cy="0"
-              r="5"
-              fill="#1A1A1A"
-            />
-          </g>
-          <g
-            id="peekaboo-eye-black-R"
-            ref={eyeGroupRefs['peekaboo-eye-black-R']}
-            transform="translate(291, 161)"
-          >
-            <ellipse
-              id="peekaboo-eye-bg-black-R"
-              cx="0"
-              cy="0"
-              rx="12"
-              ry="11"
-              fill="#FFFFFF"
-            />
-            <circle
-              id="peekaboo-pupil-black-R"
-              ref={pupilRefs['peekaboo-pupil-black-R']}
-              cx="0"
-              cy="0"
-              r="5"
-              fill="#1A1A1A"
-            />
-          </g>
+            <g
+              id="peekaboo-eye-black-L"
+              ref={eyeGroupRefs['peekaboo-eye-black-L']}
+              transform="translate(260, 161)"
+            >
+              <ellipse
+                id="peekaboo-eye-bg-black-L"
+                cx="0"
+                cy="0"
+                rx="12"
+                ry="11"
+                fill="#FFFFFF"
+              />
+              <circle
+                id="peekaboo-pupil-black-L"
+                ref={pupilRefs['peekaboo-pupil-black-L']}
+                cx="0"
+                cy="0"
+                r="5"
+                fill="#1A1A1A"
+              />
+            </g>
+            <g
+              id="peekaboo-eye-black-R"
+              ref={eyeGroupRefs['peekaboo-eye-black-R']}
+              transform="translate(291, 161)"
+            >
+              <ellipse
+                id="peekaboo-eye-bg-black-R"
+                cx="0"
+                cy="0"
+                rx="12"
+                ry="11"
+                fill="#FFFFFF"
+              />
+              <circle
+                id="peekaboo-pupil-black-R"
+                ref={pupilRefs['peekaboo-pupil-black-R']}
+                cx="0"
+                cy="0"
+                r="5"
+                fill="#1A1A1A"
+              />
+            </g>
+          </motion.g>
         </motion.g>
 
         <motion.g
@@ -184,63 +239,73 @@ export default function PeekabooCharacters({
           initial={false}
           style={svgPivotStyle}
           animate={{
-            rotate: peek ? 9 : 0,
-            scaleY: peek ? 1.1 : 1,
+            rotate: 0,
+            scaleY: 1,
             x: 0,
             y: 0,
           }}
           transition={bodyTransition}
         >
           <g transform="translate(28, 0)">
-          <path
-            id="peekaboo-body-orange"
-            fill="#E87C6B"
-            d="M 34 290 L 34 242 A 67 67 0 0 1 166 242 L 166 290 Z"
-          />
-          <g
-            id="peekaboo-eye-orange-L"
-            ref={eyeGroupRefs['peekaboo-eye-orange-L']}
-            transform="translate(85, 225)"
-          >
-            <circle
-              id="peekaboo-eye-bg-orange-L"
-              cx="0"
-              cy="0"
-              r="8"
-              fill="#D96B5A"
-              opacity="0.85"
+            <motion.path
+              id="peekaboo-body-orange"
+              fill="#E87C6B"
+              initial={false}
+              animate={{
+                d: BODY_PATHS.orange[pose],
+              }}
+              transition={bodyTransition}
             />
-            <circle
-              id="peekaboo-pupil-orange-L"
-              ref={pupilRefs['peekaboo-pupil-orange-L']}
-              cx="0"
-              cy="0"
-              r="4"
-              fill="#1A1A1A"
-            />
-          </g>
-          <g
-            id="peekaboo-eye-orange-R"
-            ref={eyeGroupRefs['peekaboo-eye-orange-R']}
-            transform="translate(115, 225)"
-          >
-            <circle
-              id="peekaboo-eye-bg-orange-R"
-              cx="0"
-              cy="0"
-              r="8"
-              fill="#D96B5A"
-              opacity="0.85"
-            />
-            <circle
-              id="peekaboo-pupil-orange-R"
-              ref={pupilRefs['peekaboo-pupil-orange-R']}
-              cx="0"
-              cy="0"
-              r="4"
-              fill="#1A1A1A"
-            />
-          </g>
+            <motion.g
+              initial={false}
+              animate={{ x: eyeOffset.x, y: eyeOffset.y }}
+              transition={bodyTransition}
+            >
+              <g
+                id="peekaboo-eye-orange-L"
+                ref={eyeGroupRefs['peekaboo-eye-orange-L']}
+                transform="translate(85, 225)"
+              >
+                <circle
+                  id="peekaboo-eye-bg-orange-L"
+                  cx="0"
+                  cy="0"
+                  r="8"
+                  fill="#D96B5A"
+                  opacity="0.85"
+                />
+                <circle
+                  id="peekaboo-pupil-orange-L"
+                  ref={pupilRefs['peekaboo-pupil-orange-L']}
+                  cx="0"
+                  cy="0"
+                  r="4"
+                  fill="#1A1A1A"
+                />
+              </g>
+              <g
+                id="peekaboo-eye-orange-R"
+                ref={eyeGroupRefs['peekaboo-eye-orange-R']}
+                transform="translate(115, 225)"
+              >
+                <circle
+                  id="peekaboo-eye-bg-orange-R"
+                  cx="0"
+                  cy="0"
+                  r="8"
+                  fill="#D96B5A"
+                  opacity="0.85"
+                />
+                <circle
+                  id="peekaboo-pupil-orange-R"
+                  ref={pupilRefs['peekaboo-pupil-orange-R']}
+                  cx="0"
+                  cy="0"
+                  r="4"
+                  fill="#1A1A1A"
+                />
+              </g>
+            </motion.g>
           </g>
         </motion.g>
 
@@ -249,74 +314,83 @@ export default function PeekabooCharacters({
           initial={false}
           style={svgPivotStyle}
           animate={{
-            rotate: peek ? 9 : 0,
-            scaleY: peek ? 1.1 : 1,
+            rotate: 0,
+            scaleY: 1,
             x: 0,
             y: 0,
           }}
           transition={bodyTransition}
         >
           <g transform="translate(-34, 0)">
-          <path
-            id="peekaboo-body-yellow"
-            fill="#E8D44D"
-            d="M 322 290 L 322 212 C 322 192 338 174 363 174 C 388 174 404 192 404 212 L 404 290 Z"
-          />
-          {/* 两只眼睛离得更近：将L、R的x坐标中间靠近一些 */}
-          <g
-            id="peekaboo-eye-yellow-L"
-            ref={eyeGroupRefs['peekaboo-eye-yellow-L']}
-            transform="translate(352, 198)"
-          >
-            <circle
-              id="peekaboo-eye-bg-yellow-L"
-              cx="0"
-              cy="0"
-              r="7.5"
-              fill="#D4C84A"
-              opacity="0.9"
+            <motion.path
+              id="peekaboo-body-yellow"
+              fill="#E8D44D"
+              initial={false}
+              animate={{
+                d: BODY_PATHS.yellow[pose],
+              }}
+              transition={bodyTransition}
             />
-            <circle
-              id="peekaboo-pupil-yellow-L"
-              ref={pupilRefs['peekaboo-pupil-yellow-L']}
-              cx="0"
-              cy="0"
-              r="3.5"
-              fill="#1A1A1A"
+            <motion.g
+              initial={false}
+              animate={{ x: eyeOffset.x, y: eyeOffset.y }}
+              transition={bodyTransition}
+            >
+              <g
+                id="peekaboo-eye-yellow-L"
+                ref={eyeGroupRefs['peekaboo-eye-yellow-L']}
+                transform="translate(352, 198)"
+              >
+                <circle
+                  id="peekaboo-eye-bg-yellow-L"
+                  cx="0"
+                  cy="0"
+                  r="7.5"
+                  fill="#D4C84A"
+                  opacity="0.9"
+                />
+                <circle
+                  id="peekaboo-pupil-yellow-L"
+                  ref={pupilRefs['peekaboo-pupil-yellow-L']}
+                  cx="0"
+                  cy="0"
+                  r="3.5"
+                  fill="#1A1A1A"
+                />
+              </g>
+              <g
+                id="peekaboo-eye-yellow-R"
+                ref={eyeGroupRefs['peekaboo-eye-yellow-R']}
+                transform="translate(374, 198)"
+              >
+                <circle
+                  id="peekaboo-eye-bg-yellow-R"
+                  cx="0"
+                  cy="0"
+                  r="7.5"
+                  fill="#D4C84A"
+                  opacity="0.9"
+                />
+                <circle
+                  id="peekaboo-pupil-yellow-R"
+                  ref={pupilRefs['peekaboo-pupil-yellow-R']}
+                  cx="0"
+                  cy="0"
+                  r="3.5"
+                  fill="#1A1A1A"
+                />
+              </g>
+            </motion.g>
+            <line
+              id="peekaboo-mouth-yellow"
+              x1="340"
+              y1="220"
+              x2="386"
+              y2="220"
+              stroke="#1A1A1A"
+              strokeWidth="3.5"
+              strokeLinecap="round"
             />
-          </g>
-          <g
-            id="peekaboo-eye-yellow-R"
-            ref={eyeGroupRefs['peekaboo-eye-yellow-R']}
-            transform="translate(374, 198)"
-          >
-            <circle
-              id="peekaboo-eye-bg-yellow-R"
-              cx="0"
-              cy="0"
-              r="7.5"
-              fill="#D4C84A"
-              opacity="0.9"
-            />
-            <circle
-              id="peekaboo-pupil-yellow-R"
-              ref={pupilRefs['peekaboo-pupil-yellow-R']}
-              cx="0"
-              cy="0"
-              r="3.5"
-              fill="#1A1A1A"
-            />
-          </g>
-          <line
-            id="peekaboo-mouth-yellow"
-            x1="340"
-            y1="220"
-            x2="386"
-            y2="220"
-            stroke="#1A1A1A"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
           </g>
         </motion.g>
       </svg>
