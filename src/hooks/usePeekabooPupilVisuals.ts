@@ -64,6 +64,8 @@ const LOOK_LEFT_OFFSET_X = 190
 /** 明文回避时，放宽眼球/眼组位移限幅，避免普通状态限幅导致体感不明显 */
 const PASSWORD_VISIBLE_INNER_MAX = 7.2
 const PASSWORD_VISIBLE_OUTER_MAX = 3.8
+/** 嘴巴跟随眼球内层位移的系数，增强“跟随感” */
+const MOUTH_INNER_FOLLOW_FACTOR = 0.22
 
 function lerp(current: number, target: number, alpha: number): number {
   return current + (target - current) * alpha
@@ -280,8 +282,12 @@ export function usePeekabooPupilVisuals(
       const yellowRight = motionRef.current['peekaboo-pupil-yellow-R']
       const yellowMouth = document.getElementById(YELLOW_MOUTH_ID)
       if (yellowMouth) {
-        const mouthX = (yellowLeft.currentOuterX + yellowRight.currentOuterX) / 2
-        const mouthY = (yellowLeft.currentOuterY + yellowRight.currentOuterY) / 2
+        const avgOuterX = (yellowLeft.currentOuterX + yellowRight.currentOuterX) / 2
+        const avgOuterY = (yellowLeft.currentOuterY + yellowRight.currentOuterY) / 2
+        const avgInnerX = (yellowLeft.currentInnerX + yellowRight.currentInnerX) / 2
+        const avgInnerY = (yellowLeft.currentInnerY + yellowRight.currentInnerY) / 2
+        const mouthX = avgOuterX + avgInnerX * MOUTH_INNER_FOLLOW_FACTOR
+        const mouthY = avgOuterY + avgInnerY * MOUTH_INNER_FOLLOW_FACTOR
         yellowMouth.setAttribute(
           'transform',
           `translate(${mouthX.toFixed(3)}, ${mouthY.toFixed(3)})`,

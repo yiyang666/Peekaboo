@@ -29,28 +29,38 @@ function getBodyPose(state: InteractionState): BodyPose {
 
 const BODY_PATHS = {
   purple: {
-    IDLE: 'M 158 290 L 262 290 L 262 74 Q 210 40 158 74 Z',
-    EMAIL_FOCUS: 'M 158 290 L 262 290 L 254 30 Q 214 -2 166 30 Z',
-    PASSWORD_FOCUS: 'M 158 290 L 262 290 L 278 68 Q 230 30 178 68 Z',
-    PASSWORD_VISIBLE: 'M 158 290 L 262 290 L 248 90 Q 203 56 158 90 Z',
+    IDLE:
+      'M 158 290 L 262 290 L 262 30 Q 262 4 252 22 Q 210 4 168 22 Q 158 4 158 30 Z',
+    EMAIL_FOCUS:
+      // 上端两个端点向右偏移，并整体抬高形成拉伸效果
+      'M 158 290 L 262 290 L 283 11 Q 283 -2 273 15 Q 231 -8 189 15 Q 179 -2 179 11 Z',
+    PASSWORD_FOCUS:
+      // 拉伸幅度比 EMAIL_FOCUS 小，但右倾幅度更大，头部形状保持一致
+      'M 158 290 L 262 290 L 287 45 Q 287 33 277 45 Q 232 22 190 39 Q 180 27 180 41 Z',
+    PASSWORD_VISIBLE:
+      'M 158 290 L 262 290 L 262 30 Q 262 4 252 22 Q 210 4 168 22 Q 158 4 158 30 Z',
   },
+  // A 后 5位表示头部形状，第一个L后面和第二个L前面两个数调整左右倾斜度和高度
   black: {
-    IDLE: 'M 228 290 L 322 290 L 322 154 Q 275 112 228 154 Z',
-    EMAIL_FOCUS: 'M 228 290 L 322 290 L 314 94 Q 281 62 236 94 Z',
-    PASSWORD_FOCUS: 'M 228 290 L 322 290 L 340 150 Q 297 112 248 150 Z',
-    PASSWORD_VISIBLE: 'M 228 290 L 322 290 L 308 172 Q 268 140 228 172 Z',
+    IDLE: 'M 228 290 L 228 142 A 48 48 0 0 1 322 142 L 322 290 Z',
+    EMAIL_FOCUS: 'M 228 290 L 238 102 A 48 48 0 0 1 332 102 L 322 290 Z',
+    PASSWORD_FOCUS: 'M 228 290 L 248 122 A 48 48 0 0 1 342 122 L 322 290 Z',
+    PASSWORD_VISIBLE: 'M 228 290 L 228 142 A 48 48 0 0 1 322 142 L 322 290 Z',
   },
   orange: {
-    IDLE: 'M 34 290 L 166 290 L 166 240 Q 100 174 34 240 Z',
-    EMAIL_FOCUS: 'M 34 290 L 166 290 L 158 186 Q 108 126 42 186 Z',
-    PASSWORD_FOCUS: 'M 34 290 L 166 290 L 184 236 Q 126 170 58 236 Z',
-    PASSWORD_VISIBLE: 'M 34 290 L 166 290 L 152 252 Q 93 200 34 252 Z',
+    IDLE: 'M 34 290 L 34 242 A 67 67 0 0 1 166 242 L 166 290 Z',
+    EMAIL_FOCUS: 'M 34 290 L 44 202 A 67 67 0 0 1 176 202 L 166 290 Z',
+    PASSWORD_FOCUS: 'M 34 290 L 54 228 A 67 67 0 0 1 186 228 L 166 290 Z',
+    PASSWORD_VISIBLE: 'M 34 290 L 34 242 A 67 67 0 0 1 166 242 L 166 290 Z',
   },
   yellow: {
-    IDLE: 'M 322 290 L 404 290 L 404 214 Q 363 174 322 214 Z',
-    EMAIL_FOCUS: 'M 322 290 L 404 290 L 396 158 Q 369 116 330 158 Z',
-    PASSWORD_FOCUS: 'M 322 290 L 404 290 L 422 208 Q 388 166 342 208 Z',
-    PASSWORD_VISIBLE: 'M 322 290 L 404 290 L 390 228 Q 356 194 322 228 Z',
+    IDLE: 'M 322 290 L 322 192 Q 322 180 334 180 L 392 180 Q 404 180 404 192 L 404 290 Z',
+    EMAIL_FOCUS:
+      'M 322 290 L 332 162 Q 332 150 344 150 L 402 150 Q 414 150 414 162 L 404 290 Z',
+    PASSWORD_FOCUS:
+      'M 322 290 L 342 182 Q 342 170 354 170 L 412 170 Q 424 170 424 182 L 404 290 Z',
+    PASSWORD_VISIBLE:
+      'M 322 290 L 322 192 Q 322 180 334 180 L 392 180 Q 404 180 404 192 L 404 290 Z',
   },
 } as const
 
@@ -69,7 +79,7 @@ export default function PeekabooCharacters({
     IDLE: { x: 0, y: 0 },
     EMAIL_FOCUS: { x: 8, y: -18 },
     PASSWORD_FOCUS: { x: 12, y: -8 },
-    PASSWORD_VISIBLE: { x: -6, y: -3 },
+    PASSWORD_VISIBLE: { x: -12, y: -3 },
   }[pose]
 
   return (
@@ -111,13 +121,13 @@ export default function PeekabooCharacters({
             <g
               id="peekaboo-eye-purple-L"
               ref={eyeGroupRefs['peekaboo-eye-purple-L']}
-              transform="translate(192, 92)"
+              transform="translate(192, 60)"
             >
               <rect
                 id="peekaboo-eye-bg-purple-L"
                 x="-12"
                 y="-6"
-                width="20"
+                width="25"
                 height="12"
                 rx="3"
                 fill="#5B4DB8"
@@ -127,7 +137,7 @@ export default function PeekabooCharacters({
                 ref={pupilRefs['peekaboo-pupil-purple-L']}
                 x="-8"
                 y="-2"
-                width="12"
+                width="15"
                 height="4"
                 rx="1"
                 fill="#FFFFFF"
@@ -136,13 +146,13 @@ export default function PeekabooCharacters({
             <g
               id="peekaboo-eye-purple-R"
               ref={eyeGroupRefs['peekaboo-eye-purple-R']}
-              transform="translate(228, 92)"
+              transform="translate(228, 60)"
             >
               <rect
                 id="peekaboo-eye-bg-purple-R"
                 x="-12"
                 y="-6"
-                width="20"
+                width="25"
                 height="12"
                 rx="3"
                 fill="#5B4DB8"
@@ -152,7 +162,7 @@ export default function PeekabooCharacters({
                 ref={pupilRefs['peekaboo-pupil-purple-R']}
                 x="-8"
                 y="-2"
-                width="12"
+                width="15"
                 height="4"
                 rx="1"
                 fill="#FFFFFF"
@@ -190,7 +200,7 @@ export default function PeekabooCharacters({
             <g
               id="peekaboo-eye-black-L"
               ref={eyeGroupRefs['peekaboo-eye-black-L']}
-              transform="translate(260, 161)"
+              transform="translate(260, 150)"
             >
               <ellipse
                 id="peekaboo-eye-bg-black-L"
@@ -212,7 +222,7 @@ export default function PeekabooCharacters({
             <g
               id="peekaboo-eye-black-R"
               ref={eyeGroupRefs['peekaboo-eye-black-R']}
-              transform="translate(291, 161)"
+              transform="translate(291, 150)"
             >
               <ellipse
                 id="peekaboo-eye-bg-black-R"
@@ -339,7 +349,7 @@ export default function PeekabooCharacters({
               <g
                 id="peekaboo-eye-yellow-L"
                 ref={eyeGroupRefs['peekaboo-eye-yellow-L']}
-                transform="translate(352, 198)"
+                transform="translate(350, 198)"
               >
                 <circle
                   id="peekaboo-eye-bg-yellow-L"
@@ -361,7 +371,7 @@ export default function PeekabooCharacters({
               <g
                 id="peekaboo-eye-yellow-R"
                 ref={eyeGroupRefs['peekaboo-eye-yellow-R']}
-                transform="translate(374, 198)"
+                transform="translate(376, 198)"
               >
                 <circle
                   id="peekaboo-eye-bg-yellow-R"
@@ -380,17 +390,17 @@ export default function PeekabooCharacters({
                   fill="#1A1A1A"
                 />
               </g>
+              <line
+                id="peekaboo-mouth-yellow"
+                x1="340"
+                y1="220"
+                x2="386"
+                y2="220"
+                stroke="#1A1A1A"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+              />
             </motion.g>
-            <line
-              id="peekaboo-mouth-yellow"
-              x1="340"
-              y1="220"
-              x2="386"
-              y2="220"
-              stroke="#1A1A1A"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-            />
           </g>
         </motion.g>
       </svg>
