@@ -60,7 +60,10 @@ const YELLOW_MOUTH_ID = 'peekaboo-mouth-yellow'
 /** 密码注视点相对输入框中心下移，贴近「右下方偷瞄」 */
 const PASSWORD_TARGET_OFFSET_Y = 14
 /** 明文时眼珠看向画外左侧的屏幕 X 偏移（相对 SVG 左缘再向左） */
-const LOOK_LEFT_OFFSET_X = 140
+const LOOK_LEFT_OFFSET_X = 190
+/** 明文回避时，放宽眼球/眼组位移限幅，避免普通状态限幅导致体感不明显 */
+const PASSWORD_VISIBLE_INNER_MAX = 7.2
+const PASSWORD_VISIBLE_OUTER_MAX = 3.8
 
 function lerp(current: number, target: number, alpha: number): number {
   return current + (target - current) * alpha
@@ -169,7 +172,13 @@ export function usePeekabooPupilVisuals(
   useEffect(() => {
     let rafId: number | null = null
 
-    const syncTargetsToPoint = (targetX: number, targetY: number) => {
+    const syncTargetsToPoint = (
+      targetX: number,
+      targetY: number,
+      options?: { innerMax?: number; outerMax?: number },
+    ) => {
+      const innerMax = options?.innerMax ?? INNER_MAX
+      const outerMax = options?.outerMax ?? OUTER_MAX
       activeTargetRef.current = { x: targetX, y: targetY }
       for (const eye of EYES) {
         const groupEl = eyeGroupElsRef.current[eye.eyeGroupId]
@@ -186,11 +195,11 @@ export function usePeekabooPupilVisuals(
         const centerY = rect.top + rect.height / 2
         const deltaX = targetX - centerX
         const deltaY = targetY - centerY
-        const inner = clampVector(deltaX, deltaY, INNER_MAX)
+        const inner = clampVector(deltaX, deltaY, innerMax)
         const outer = clampVector(
           deltaX * eye.parallax,
           deltaY * eye.parallax,
-          OUTER_MAX,
+          outerMax,
         )
         pupilState.targetInnerX = inner.x
         pupilState.targetInnerY = inner.y
@@ -226,7 +235,10 @@ export function usePeekabooPupilVisuals(
         const svg = document.getElementById('peekaboo-stage-svg')
         if (!svg) return
         const br = svg.getBoundingClientRect()
-        syncTargetsToPoint(br.left - LOOK_LEFT_OFFSET_X, br.top + br.height * 0.42)
+        syncTargetsToPoint(br.left - LOOK_LEFT_OFFSET_X, br.top + br.height * 0.42, {
+          innerMax: PASSWORD_VISIBLE_INNER_MAX,
+          outerMax: PASSWORD_VISIBLE_OUTER_MAX,
+        })
       }
     }
 

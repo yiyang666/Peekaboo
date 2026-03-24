@@ -129,20 +129,21 @@ export default function PeekabooCharacters({
           <path
             id="peekaboo-body-black"
             fill="#1A1A1A"
-            // Further fatter: even wider body, rounder appearance
-            d="M 238 290 L 238 152 Q 238 122 268 122 L 272 122 Q 302 122 302 152 L 302 290 Z"
+            // Fatter: much wider, rounder body, with matching top curve
+            d="M 228 290 L 228 147 Q 228 118 275 118 Q 322 118 322 147 L 322 290 Z"
           />
           <g
             id="peekaboo-eye-black-L"
             ref={eyeGroupRefs['peekaboo-eye-black-L']}
-            transform="translate(255, 158)"
+            // Move eyes outward and slightly downward for fatter/rounder look
+            transform="translate(260, 161)"
           >
             <ellipse
               id="peekaboo-eye-bg-black-L"
               cx="0"
               cy="0"
-              rx="10"
-              ry="10"
+              rx="12"
+              ry="11"
               fill="#FFFFFF"
             />
             <circle
@@ -150,21 +151,21 @@ export default function PeekabooCharacters({
               ref={pupilRefs['peekaboo-pupil-black-L']}
               cx="0"
               cy="0"
-              r="4"
+              r="5"
               fill="#1A1A1A"
             />
           </g>
           <g
             id="peekaboo-eye-black-R"
             ref={eyeGroupRefs['peekaboo-eye-black-R']}
-            transform="translate(286, 158)"
+            transform="translate(291, 161)"
           >
             <ellipse
               id="peekaboo-eye-bg-black-R"
               cx="0"
               cy="0"
-              rx="10"
-              ry="10"
+              rx="12"
+              ry="11"
               fill="#FFFFFF"
             />
             <circle
@@ -172,7 +173,7 @@ export default function PeekabooCharacters({
               ref={pupilRefs['peekaboo-pupil-black-R']}
               cx="0"
               cy="0"
-              r="4"
+              r="5"
               fill="#1A1A1A"
             />
           </g>

@@ -102,6 +102,30 @@ export default function LoginPage() {
     }
   }
 
+  function handleEmailFocus() {
+    if (showPassword) {
+      setInteractionState('PASSWORD_VISIBLE')
+      return
+    }
+    setInteractionState('EMAIL_FOCUS')
+  }
+
+  function handlePasswordFocus() {
+    if (showPassword) {
+      setInteractionState('PASSWORD_VISIBLE')
+      return
+    }
+    setInteractionState('PASSWORD_FOCUS')
+  }
+
+  function handleInputBlur() {
+    if (showPassword) {
+      setInteractionState('PASSWORD_VISIBLE')
+      return
+    }
+    setInteractionState('IDLE')
+  }
+
   return (
     <div className="flex min-h-screen flex-row">
       <aside
@@ -159,8 +183,8 @@ export default function LoginPage() {
                 autoComplete="email"
                 placeholder="you@example.com"
                 className={inputClass}
-                onFocus={() => setInteractionState('EMAIL_FOCUS')}
-                onBlur={() => setInteractionState('IDLE')}
+                onFocus={handleEmailFocus}
+                onBlur={handleInputBlur}
               />
             </div>
 
@@ -180,14 +204,8 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   placeholder="••••••••"
                   className={`${inputClass} pr-11`}
-                  onFocus={() => setInteractionState('PASSWORD_FOCUS')}
-                  onBlur={() => {
-                    if (showPassword) {
-                      setInteractionState('PASSWORD_VISIBLE')
-                    } else {
-                      setInteractionState('IDLE')
-                    }
-                  }}
+                  onFocus={handlePasswordFocus}
+                  onBlur={handleInputBlur}
                 />
                 <button
                   type="button"
