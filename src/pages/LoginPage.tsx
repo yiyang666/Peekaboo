@@ -78,7 +78,7 @@ export default function LoginPage() {
   const emailInputRef = useRef<HTMLInputElement>(null)
   const passwordInputRef = useRef<HTMLInputElement>(null)
 
-  usePeekabooPupilVisuals(
+  const { eyeGroupRefs, pupilRefs } = usePeekabooPupilVisuals(
     interactionState,
     emailInputRef,
     passwordInputRef,
@@ -121,7 +121,11 @@ export default function LoginPage() {
         </header>
 
         <div className="pointer-events-none flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-8">
-          <PeekabooCharacters interactionState={interactionState} />
+          <PeekabooCharacters
+            interactionState={interactionState}
+            eyeGroupRefs={eyeGroupRefs}
+            pupilRefs={pupilRefs}
+          />
         </div>
       </aside>
 
