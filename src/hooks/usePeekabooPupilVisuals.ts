@@ -57,6 +57,8 @@ const INNER_MAX = 5
 const OUTER_MAX = 2.6
 const SMOOTHING = 0.18
 const YELLOW_MOUTH_ID = 'peekaboo-mouth-yellow'
+const EMAIL_TARGET_OFFSET_X = 10
+const PASSWORD_TARGET_OFFSET_X = 14
 /** 密码注视点相对输入框中心下移，贴近「右下方偷瞄」 */
 const PASSWORD_TARGET_OFFSET_Y = 14
 /** 明文时眼珠看向画外左侧的屏幕 X 偏移（相对 SVG 左缘再向左） */
@@ -220,7 +222,7 @@ export function usePeekabooPupilVisuals(
         const el = emailRef.current
         if (!el) return
         const r = el.getBoundingClientRect()
-        syncTargetsToPoint(r.left + r.width / 2, r.top + r.height / 2)
+        syncTargetsToPoint(r.left + r.width / 2 + EMAIL_TARGET_OFFSET_X, r.top + r.height / 2)
         return
       }
       if (state === 'PASSWORD_FOCUS') {
@@ -228,7 +230,7 @@ export function usePeekabooPupilVisuals(
         if (!el) return
         const r = el.getBoundingClientRect()
         syncTargetsToPoint(
-          r.left + r.width / 2,
+          r.left + r.width / 2 + PASSWORD_TARGET_OFFSET_X,
           r.top + r.height / 2 + PASSWORD_TARGET_OFFSET_Y,
         )
         return

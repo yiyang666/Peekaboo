@@ -77,8 +77,8 @@ export default function PeekabooCharacters({
   const pose = getBodyPose(interactionState)
   const eyeOffset = {
     IDLE: { x: 0, y: 0 },
-    EMAIL_FOCUS: { x: 8, y: -18 },
-    PASSWORD_FOCUS: { x: 12, y: -8 },
+    EMAIL_FOCUS: { x: 12, y: -18 },
+    PASSWORD_FOCUS: { x: 16, y: -8 },
     PASSWORD_VISIBLE: { x: -12, y: -3 },
   }[pose]
 
